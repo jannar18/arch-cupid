@@ -1,37 +1,32 @@
 import { serve } from "bun";
 import index from "./index.html";
+import Anthropic from "@anthropic-ai/sdk";
+
 
 require('dotenv').config()
+
+const anthropic = new Anthropic();
 
 const server = serve({
   routes: {
     // Serve index.html for all unmatched routes.
     "/*": index,
 
-    "/api/hello": {
-      async GET(req) {
-        const response = await fetch("https://api.anthropic.com/v1/messages", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-api-key": process.env.ANTHROPIC_API_KEY!,
-            "anthropic-version": "2023-06-01",
-          },
-          body: JSON.stringify({
-            model: "claude-haiku-4-5-20251001",
-            max_tokens: 1000,
-            messages: [
-              {
-                role: "user",
-                content: "Say hello in a fun way!",
-              },
-            ],
-          }),
-        });
 
-        const data = await response.json();
-        return Response.json(data);
+    "/api/hello": {
+
+      async GET(req) {
+        const message = await anthropic.messages.create({
+          model: "claude-haiku-4-5-20251001",
+          max_tokens: 1000,
+          messages: [
+            {role: "user", content: "Say hello in a fun way!"}
+          ],
+          }); 
+
+        return Response.json(message);
       },
+
       async PUT(req) {
         return Response.json({
           message: "Hello, world!",
