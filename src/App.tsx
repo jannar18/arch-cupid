@@ -1,5 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { ArrowUpIcon } from "lucide-react"
 import { useState } from "react";
 import "./index.css";
 
@@ -7,6 +9,7 @@ export function App() {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<{role: string, content: string}[]>([]);
   const sendMessage = async () => {
+    if (!input) return;
     const response = await fetch( "/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -23,20 +26,28 @@ export function App() {
   };
 
   return (
-    <div className="container mx-auto p-8 text-center relative z-10">
-      <div> 
-        <div>
+    <div className="flex flex-col items-center mx-auto p-4 h-screen">
+      <div className="flex flex-col items-center gap-4"> 
+        <ScrollArea className="h-[200px] w-[350px] rounded-md border p-4"> 
+          <div>
           {messages.map((message) => (
             <div>{message.role}: {message.content}</div>
           ))}
         </div>
-        <Textarea 
+        </ScrollArea>
+        <Textarea
+          className="min-h-[80px] w-[350px] rounded-md border p-4 resize-none overflow-hidden"
           placeholder="Put your message to Claude here!"
           value={input}
-          onChange={(event) => setInput(event.target.value)}
+          onChange={(event) => {
+            setInput(event.target.value);
+            event.target.style.height = "auto";
+            event.target.style.height = event.target.scrollHeight + "px";
+          }}
           />
         <Button
-          onClick={ sendMessage }>Send</Button>
+        variant="outline" size="icon" className="rounded-full"
+        onClick={ sendMessage }><ArrowUpIcon /></Button>
       </div>
     </div>
   );
