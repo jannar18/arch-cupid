@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ArrowUpIcon } from "lucide-react"
+import { Card, CardContent } from "@/components/ui/card";
 import { useState } from "react";
 import "./index.css";
 
@@ -29,9 +30,11 @@ export function App() {
     <div className="flex flex-col items-center mx-auto p-4 h-screen">
       <div className="flex flex-col items-center gap-4"> 
         <ScrollArea className="h-[200px] w-[350px] rounded-md border p-4"> 
-          <div>
+          <div className="flex flex-col gap-4">
           {messages.map((message) => (
-            <div>{message.role}: {message.content}</div>
+            <Card className="p-1">
+              <CardContent>{message.role}: {message.content}</CardContent>
+            </Card>
           ))}
         </div>
         </ScrollArea>
