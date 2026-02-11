@@ -1,17 +1,45 @@
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ArrowUpIcon } from "lucide-react"
+import { ArrowUpIcon, PlusIcon } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card";
+import { Drawer,DrawerClose,DrawerContent,DrawerDescription,DrawerFooter,DrawerHeader,DrawerTitle,DrawerTrigger } from "@/components/ui/drawer";
 import { useState } from "react";
 import "./index.css";
+import type { Conversation } from "./storage";
 
 export function App() {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<{role: string, content: string}[]>([]);
+  const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  const selectConversation = async (id: string) => { 
+    const response = await fetch(`/api/conversations/${id}`); 
+    const conversation = await response.json();
+    setCurrentConversationId(id); 
+    setMessages(conversation.messages);
+    setDrawerOpen(false); 
+  };
+
+  const startNewConversation = () => { 
+    setCurrentConversationId(null);
+    setMessages([]);
+    setDrawerOpen(false);
+  };
+  
   const sendMessage = async () => {
-    if (!input) return;
-    const response = await fetch( "/api/chat", {
+    if (!input) return
+    let conversationId = currentConversationId;
+    if (!conversationId) {
+      const res = await fetch("/api/conversations", {method: "POST"});
+      const newConversation = await res.json();
+      conversationId = newConversation.id; 
+      setCurrentConversationId(conversationId); 
+    }
+
+    const response = await fetch( `/api/conversations/${conversationId}/chat`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({message: input}),
@@ -24,15 +52,43 @@ export function App() {
     ]);
 
     setInput("");
+
+    const updatedList = await fetch("/api/conversations"); 
+    setConversations(await updatedList.json());
   };
 
   return (
     <div className="flex flex-col h-full items-center mx-auto p-4 h-screen overflow-hidden">
+      <div className="w-full flex justify-start">
+        <Drawer direction="left" open={drawerOpen} onOpenChange={setDrawerOpen}>
+            <DrawerTrigger>
+              <PlusIcon className="size-8 text-[#E34234] stroke-[3] cursor-pointer hover:opacity-70">
+              </PlusIcon>
+            </DrawerTrigger>
+            <DrawerContent>
+              <DrawerHeader className="bg-[#E34234] p-0">
+                <h2 className="!text-white text-normal text-3x1">Conversations</h2>
+              </DrawerHeader>
+              <button><PlusIcon
+                className="size-8 text-[#E34234] stroke-[3] cursor-pointer hover:opacity-70"
+                onClick={() => startNewConversation()}></PlusIcon>
+                {conversations.map((conversation) => (
+                  <div key={conversation.id}
+                  className="p-2 cursor-pointer hover:bg-gray-100"
+                  onClick={() => selectConversation(conversation.id)}
+                  >
+                    {conversation.title}
+                  </div>
+                ))}
+              </button>
+            </DrawerContent>
+          </Drawer>
+        </div>
       <div className="flex flex-col h-full items-center gap-4 relative"> 
         <ScrollArea className="flex-1 min-h-0 w-[600px] max-w-2xl bg-gray-50 p-0"> 
           <div className="flex flex-col-reverse gap-4">
-          {messages.map((message) => (
-            <Card className={message.role === "user" 
+          {messages.map((message, index) => (
+            <Card key={index} className={message.role === "user" 
               ? "bg-[#E34234] border-t-0 text-white mr-auto rounded-none" 
               : "bg-gray-100 border-t-0 border-gray-200 text-black ml-auto rounded-none"}>
               <CardContent className={message.role === "user" 
