@@ -31,7 +31,7 @@ export class SqliteStorage implements Storage {
 // Conversation: conversationId, title, createdAt, updatedAt
 // Messages: id, conversationId, role, content, createdAt
 
-    createConversation(): Conversation {
+    async createConversation(): Promise<Conversation> {
         //createConversation - INSERT INTO conversations
         const conversation: Conversation = {
             messages: [],
@@ -48,7 +48,7 @@ export class SqliteStorage implements Storage {
         return conversation;
     }
 
-    getConversation(id: string): Conversation | null {
+    async getConversation(id: string): Promise<Conversation | null> {
         //getConversation - SELECT FROM conversations - need id
         const conversationRow = db.query("SELECT * FROM conversations WHERE id = ?").get(id) as any;
         // If no row found, conversation doesn't exist
@@ -69,7 +69,7 @@ export class SqliteStorage implements Storage {
         };
     }
 
-    getConversations(): Conversation[] {
+    async getConversations(): Promise<Conversation[]> {
         //getConversations - SELECT FROM conversations - all columns
         const rows = db.query("SELECT * FROM conversations ORDER BY updatedAt DESC").all() as any[];
 
@@ -89,7 +89,7 @@ export class SqliteStorage implements Storage {
         });
     }
 
-    addMessageToConversation(id: string, message: Message): Conversation | null {
+    async addMessageToConversation(id: string, message: Message): Promise<Conversation | null> {
         //addMessageToConversation - INSERT INTO messages - id, conversationId, role, content, createdAt
         //addMessageToConversation - UPDATE conversations - updatedAt
         const conversationRow = db.query("SELECT * FROM conversations WHERE id = ?").get(id) as any;

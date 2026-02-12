@@ -13,17 +13,17 @@ export type Conversation = {
     updatedAt: number;
 }
 
-interface Storage { 
-    createConversation(): Conversation;
-    getConversation(id: string): Conversation | null;
-    getConversations(): Conversation[];
-    addMessageToConversation(id: string, message: Message): Conversation | null;
+export interface Storage {
+    createConversation(): Promise<Conversation>;
+    getConversation(id: string): Promise<Conversation | null>;
+    getConversations(): Promise<Conversation[]>;
+    addMessageToConversation(id: string, message: Message): Promise<Conversation | null>;
 };
 
 export class InMemoryStorage implements Storage {
     conversations: Record<string, Conversation> = {};
 
-    createConversation(): Conversation {
+    async createConversation(): Promise<Conversation> {
         const conversation: Conversation = { 
             messages: [],
             id: crypto.randomUUID(),
@@ -35,18 +35,18 @@ export class InMemoryStorage implements Storage {
     return conversation;
     }
 
-    getConversation(id:string): Conversation | null {
+    async getConversation(id:string): Promise<Conversation | null> {
         return this.conversations[id] ?? null
     }
 
-    getConversations(): Conversation[] {
+    async getConversations(): Promise<Conversation[]> {
         const allConversations = Object.values(this.conversations);
         allConversations.sort((a,b) => b.updatedAt - a.updatedAt);
         
         return allConversations;
     }
 
-    addMessageToConversation(id: string, message: Message): Conversation | null {
+    async addMessageToConversation(id: string, message: Message): Promise<Conversation | null> {
         const conversation = this.conversations[id];
         if (!conversation) return null; 
         conversation.messages.push(message);
