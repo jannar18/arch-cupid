@@ -1,16 +1,22 @@
 import { describe, test, expect, beforeEach } from "bun:test";
 import { InMemoryStorage } from "./storage";
+import { SqliteStorage } from "./sqlite-storage";
+import { Database } from "bun:sqlite";
 
-describe("InMemoryStorage", () => {
-    let storage: InMemoryStorage;
+// Open a connection to clear SQLite tables between tests
+const testDb = new Database("chat.db");
+
+function defineStorageTests(createStorage: () => any, cleanup?: () => void) {
+    let storage: any;
 
     beforeEach (() => {
-        storage = new InMemoryStorage();
+        if (cleanup) cleanup();
+        storage = createStorage();
     });
- 
+
     describe("createConversation", () => {
 
-    //test ensures new conversations are assigned a specific id 
+    //test ensures new conversations are assigned a specific id
         test("returns a conversation with an id", () => {
             const conversation = storage.createConversation();
             expect(conversation.id).toBeDefined();
@@ -19,12 +25,12 @@ describe("InMemoryStorage", () => {
         test("returns a new conversation with no messages", () => {
             const conversation = storage.createConversation();
             expect(conversation.messages).toEqual([])
-        }); 
+        });
     //test ensures new conversations store a timestamp at creation
         test("returns a conversation with a timestamp", () => {
             const conversation = storage.createConversation();
-            expect(conversation.createdAt).toBeDefined(); 
-        }); 
+            expect(conversation.createdAt).toBeDefined();
+        });
     //test ensures new conversations store a timestamp at creation
         test("creates conversations with unique IDs", () => {
             const conversation1 = storage.createConversation();
@@ -34,13 +40,13 @@ describe("InMemoryStorage", () => {
     });
 
     describe("getConversation", () => {
-        
+
         test("returns a conversation by grabbing its id", () => {
             const created = storage.createConversation();
             const found = storage.getConversation(created.id);
 
             expect(found).not.toBeNull();
-            expect(found!.id).toBe(created.id); 
+            expect(found!.id).toBe(created.id);
         });
 
         test("returns null for a non-existent id", () => {
@@ -51,7 +57,7 @@ describe("InMemoryStorage", () => {
     });
 
     describe("getConversations", () => {
-        
+
         test("returns empty array if no conversations have been created", () => {
             const conversations = storage.getConversations();
             expect(conversations).toEqual([])
@@ -70,8 +76,8 @@ describe("InMemoryStorage", () => {
             storage.addMessageToConversation(conversation1.id, {
                 role:"user",
                 content:"hey i'm joining an my earlier conversation"
-            }); 
-        
+            });
+
             const list = storage.getConversations();
             expect(list[0].id).toBe(conversation1.id);
         });
@@ -108,8 +114,8 @@ describe("InMemoryStorage", () => {
             storage.addMessageToConversation(conversation.id, {
                 role:"user",
                 content:"hey i'm joining an my earlier conversation"
-            }); 
-        
+            });
+
             const updated = storage.getConversation(conversation.id);
             expect(updated!.updatedAt).toBeGreaterThanOrEqual(originalUpdatedAt);
         });
@@ -117,7 +123,7 @@ describe("InMemoryStorage", () => {
         test("title is created from first user message", () => {
             const conversation = storage.createConversation();
 
-            storage.addMessageToConversation(conversation.id, { 
+            storage.addMessageToConversation(conversation.id, {
                 role:"user",
                 content:"hi this is my first message"
             });
@@ -125,18 +131,18 @@ describe("InMemoryStorage", () => {
             expect(updated!.title).toBe("hi this is my first message")
         });
 
-        test("multiple message stay in order", () => { 
+        test("multiple message stay in order", () => {
             const conversation = storage.createConversation();
 
-            storage.addMessageToConversation(conversation.id, { 
+            storage.addMessageToConversation(conversation.id, {
                 role:"user",
                 content:"first"
             });
-            storage.addMessageToConversation(conversation.id, { 
+            storage.addMessageToConversation(conversation.id, {
                 role:"user",
                 content:"second"
             });
-            storage.addMessageToConversation(conversation.id, { 
+            storage.addMessageToConversation(conversation.id, {
                 role:"user",
                 content:"third"
             });
@@ -146,5 +152,19 @@ describe("InMemoryStorage", () => {
             expect(updated!.messages[2]!.content).toBe("third");
         });
     });
+}
 
+describe("InMemoryStorage", () => {
+    defineStorageTests(() => new InMemoryStorage());
+});
+
+describe("SqliteStorage", () => {
+    defineStorageTests(
+        () => new SqliteStorage(),
+        () => {
+            // Clear both tables before each test so tests don't interfere
+            testDb.run("DELETE FROM messages");
+            testDb.run("DELETE FROM conversations");
+        }
+    );
 });
