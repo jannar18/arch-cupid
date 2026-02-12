@@ -1,12 +1,12 @@
 import { serve } from "bun";
 import index from "./index.html";
 import Anthropic from "@anthropic-ai/sdk";
-
+import { SqliteStorage } from "./sqlite-storage";
 
 require('dotenv').config()
 
 const anthropic = new Anthropic();
-let messageHistory: {role: string, content: string}[] = [];
+const storage = new SqliteStorage();
 
 const server = serve({
   routes: {
@@ -34,31 +34,56 @@ const server = serve({
       });
     },
 
-    "/api/chat": {
+    "/api/conversations": {
       async POST(req) {
-        const body = await req.json();
-
-        messageHistory.push({ role: "user", content: body.message});
-
-        const response = await anthropic.messages.create({
-          model: "claude-haiku-4-5-20251001",
-          max_tokens: 1000,
-          messages: messageHistory,
-        });
-
-        const assistantMessage = response.content[0].type === "text"
-          ? response.content[0].text: "";
-        
-        messageHistory.push({ role: "assistant", content: assistantMessage });
-
-        return Response.json({ response: assistantMessage });
+        const conversation = storage.createConversation();
+        return Response.json(conversation);
+      },
+      async GET(req) {
+        return Response.json(storage.getConversations());
       },
     },
 
-    "/api/reset": {
+    "/api/conversations/:id": {
+      async GET(req) {
+        const conversation = storage.getConversation(req.params.id);
+        if (!conversation) {
+          return Response.json({error: "Conversation not found"}, {
+          status:404});
+        }
+        return Response.json(conversation);
+      },
+    },
+
+    "/api/conversations/:id/chat": {
       async POST(req) {
-        messageHistory = [];
-        return Response.json({ message: "Conversation has been reset" });
+        const id = req.params.id;
+        const body = await req.json(); 
+
+        const conversation = storage.addMessageToConversation(id, { 
+          role:"user",
+          content: body.message,
+        }); 
+        if (!conversation ) {
+            return Response.json({error: "Conversation not found"}, {
+            status:404
+        });
+        }
+        const response = await anthropic.messages.create({
+          model: "claude-haiku-4-5-20251001",
+          max_tokens: 1000,
+          messages: conversation.messages, //instead of messageHistory
+        });
+
+        const assistantMessage = response.content[0].type === "text"
+          ? response.content[0].text : "";
+        
+        storage.addMessageToConversation(id, { 
+          role: "assistant",
+          content: assistantMessage, 
+        });
+
+        return Response.json({ response: assistantMessage });
       },
     },
   },
