@@ -1,12 +1,12 @@
 import { serve } from "bun";
 import index from "./index.html";
 import Anthropic from "@anthropic-ai/sdk";
-import { SqliteStorage } from "./sqlite-storage";
+import { SupabaseStorage } from "./supabase-storage";
 
 require('dotenv').config()
 
 const anthropic = new Anthropic();
-const storage = new SqliteStorage();
+const storage = new SupabaseStorage();
 
 const server = serve({
   routes: {
@@ -36,17 +36,17 @@ const server = serve({
 
     "/api/conversations": {
       async POST(req) {
-        const conversation = storage.createConversation();
+        const conversation = await storage.createConversation();
         return Response.json(conversation);
       },
       async GET(req) {
-        return Response.json(storage.getConversations());
+        return Response.json(await storage.getConversations());
       },
     },
 
     "/api/conversations/:id": {
       async GET(req) {
-        const conversation = storage.getConversation(req.params.id);
+        const conversation = await storage.getConversation(req.params.id);
         if (!conversation) {
           return Response.json({error: "Conversation not found"}, {
           status:404});
@@ -60,7 +60,7 @@ const server = serve({
         const id = req.params.id;
         const body = await req.json(); 
 
-        const conversation = storage.addMessageToConversation(id, { 
+        const conversation = await storage.addMessageToConversation(id, {
           role:"user",
           content: body.message,
         }); 
@@ -78,7 +78,7 @@ const server = serve({
         const assistantMessage = response.content[0].type === "text"
           ? response.content[0].text : "";
         
-        storage.addMessageToConversation(id, { 
+        await storage.addMessageToConversation(id, {
           role: "assistant",
           content: assistantMessage, 
         });
