@@ -1,12 +1,12 @@
 import { serve } from "bun";
 import index from "./index.html";
 import Anthropic from "@anthropic-ai/sdk";
-import { InMemoryStorage } from "./storage";
+import { SqliteStorage } from "./sqlite-storage";
 
 require('dotenv').config()
 
 const anthropic = new Anthropic();
-const storage = new InMemoryStorage();
+const storage = new SqliteStorage();
 
 const server = serve({
   routes: {
