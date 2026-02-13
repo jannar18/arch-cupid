@@ -14,9 +14,9 @@ export type Conversation = {
 }
 
 export interface Storage {
-    createConversation(): Promise<Conversation>;
-    getConversation(id: string): Promise<Conversation | null>;
-    getConversations(): Promise<Conversation[]>;
+    createConversation(userId: string): Promise<Conversation>;
+    getConversation(id: string, userId: string): Promise<Conversation | null>;
+    getConversations(userId: string): Promise<Conversation[]>;
     addMessageToConversation(id: string, message: Message): Promise<Conversation | null>;
 };
 
