@@ -12,7 +12,7 @@ const [input, setInput] = useState("");
         <div className="pointer-events-auto flex items-center gap-4 w-[600px] max-w-4xl z-20">
             <Textarea
             autoFocus
-            className="min-h-[10px] border-t-0 border-gray-200 p-0 resize-none overflow-hidden rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 border-gray-300 focus:bg-[#FDF3F2]"
+            className="min-h-0 border-t-0 border-gray-200 px-0 py-0 resize-none overflow-hidden rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 border-gray-300 focus:bg-[#FDF3F2]"
             placeholder="Hey there."
             value={input}
             onChange={(event) => {

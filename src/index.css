@@ -4,9 +4,9 @@
     50% { opacity: 0; }                                                         
   }  
 
- textarea {                                                                    
-    caret-color: #E34234;                                                       
-    caret-shape: block;                                                       
+ textarea, input {
+    caret-color: #E34234;
+    caret-shape: block;
   }
   
 body {
