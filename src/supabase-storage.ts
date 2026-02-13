@@ -39,7 +39,7 @@ export class SupabaseStorage implements Storage {
         const { data: messageRows } = await supabase
             .from("messages")
             .select("role, content")
-            .eq("conversationId", id)
+            .eq("chatId", id)
             .order("createdAt", { ascending: true });
 
         return {
@@ -64,7 +64,7 @@ export class SupabaseStorage implements Storage {
             const { data: messageRows } = await supabase
                 .from("messages")
                 .select("role, content")
-                .eq("conversationId", row.id)
+                .eq("chatId", row.id)
                 .order("createdAt", { ascending: true });
 
             conversations.push({
@@ -91,10 +91,9 @@ export class SupabaseStorage implements Storage {
         const messageId = crypto.randomUUID();
         const now = Date.now();
 
-        // INSERT the message
         await supabase.from("messages").insert({
             id: messageId,
-            conversationId: id,
+            chatId: id,
             role: message.role,
             content: message.content,
             createdAt: now,
@@ -110,7 +109,7 @@ export class SupabaseStorage implements Storage {
         const { count } = await supabase
             .from("messages")
             .select("*", { count: "exact", head: true })
-            .eq("conversationId", id);
+            .eq("chatId", id);
 
         if (count === 1 && message.role === "user") {
             await supabase
