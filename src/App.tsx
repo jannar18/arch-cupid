@@ -17,9 +17,9 @@ export function App() {
   }, []);
 
   return (
-    <div className="flex flex-col h-full items-center mx-auto p-4 h-screen overflow-hidden">
+    <div className="flex flex-col items-center mx-auto p-4 h-screen overflow-hidden">
     <SideBar conversations={conversations} refreshConversations={refreshConversations}/>
-    <ChatView/>
+    <ChatView refreshConversations={refreshConversations}/>
     </div>
   );
 };

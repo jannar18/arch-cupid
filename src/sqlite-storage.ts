@@ -17,7 +17,7 @@ db.run(`
 db.run(`
     CREATE TABLE IF NOT EXISTS messages (
         id TEXT PRIMARY KEY,
-        conversationId TEXT NOT NULL,
+        chatId TEXT NOT NULL,
         role TEXT NOT NULL,
         content TEXT NOT NULL,
         createdAt INTEGER NOT NULL
@@ -26,13 +26,8 @@ db.run(`
 
 export class SqliteStorage implements Storage {
 
-// INSERT, SELECT, UPDATE, DELETE
-// I need to set up tables in a database server that hold Conversation Data and Message Data
-// Conversation: conversationId, title, createdAt, updatedAt
-// Messages: id, conversationId, role, content, createdAt
 
     async createConversation(): Promise<Conversation> {
-        //createConversation - INSERT INTO conversations
         const conversation: Conversation = {
             messages: [],
             id: crypto.randomUUID(),
@@ -56,7 +51,7 @@ export class SqliteStorage implements Storage {
 
         // SELECT all messages that belong to this conversation, ordered by creation time
         const messageRows = db.query(
-            "SELECT role, content FROM messages WHERE conversationId = ? ORDER BY createdAt ASC"
+            "SELECT role, content FROM messages WHERE chatId = ? ORDER BY createdAt ASC"
         ).all(id) as any[];
 
         // Assemble the Conversation object from the two queries
@@ -76,7 +71,7 @@ export class SqliteStorage implements Storage {
         // For each conversation row, get its messages and assemble the full object
         return rows.map((row) => {
             const messageRows = db.query(
-                "SELECT role, content FROM messages WHERE conversationId = ? ORDER BY createdAt ASC"
+                "SELECT role, content FROM messages WHERE chatId = ? ORDER BY createdAt ASC"
             ).all(row.id) as any[];
 
             return {
@@ -90,7 +85,7 @@ export class SqliteStorage implements Storage {
     }
 
     async addMessageToConversation(id: string, message: Message): Promise<Conversation | null> {
-        //addMessageToConversation - INSERT INTO messages - id, conversationId, role, content, createdAt
+        //addMessageToConversation - INSERT INTO messages - id, chatId, role, content, createdAt
         //addMessageToConversation - UPDATE conversations - updatedAt
         const conversationRow = db.query("SELECT * FROM conversations WHERE id = ?").get(id) as any;
         if (!conversationRow) return null;
@@ -101,7 +96,7 @@ export class SqliteStorage implements Storage {
 
         // INSERT the message into the messages table
         db.run(
-            "INSERT INTO messages (id, conversationId, role, content, createdAt) VALUES (?, ?, ?, ?, ?)",
+            "INSERT INTO messages (id, chatId, role, content, createdAt) VALUES (?, ?, ?, ?, ?)",
             [messageId, id, message.role, message.content, now]
         );
 
@@ -113,7 +108,7 @@ export class SqliteStorage implements Storage {
 
         // Auto-set title from first user message
         const messageCount = db.query(
-            "SELECT COUNT(*) as count FROM messages WHERE conversationId = ?"
+            "SELECT COUNT(*) as count FROM messages WHERE chatId = ?"
         ).get(id) as any;
 
         if (messageCount.count === 1 && message.role === "user") {

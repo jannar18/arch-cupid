@@ -3,6 +3,7 @@ import { PlusIcon } from "lucide-react"
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import type { Conversation } from "../storage";
+import { useCreateConversation } from "src/useCreateConversation";
 
 export function SideBar({ conversations, refreshConversations }: {
     conversations: Conversation[],
@@ -10,17 +11,11 @@ export function SideBar({ conversations, refreshConversations }: {
 }) {
 
 const [drawerOpen, setDrawerOpen] = useState(false);
+const createNewConversation = useCreateConversation(refreshConversations);
 
 const navigate = useNavigate();
       const selectConversation = async (id: string) => {
         navigate(`/chat/${id}`);
-        setDrawerOpen(false);
-      };
-
-const startNewConversation = async () => { 
-       const res = await fetch("/api/conversations", { method: "POST"});
-       const newChat = await res.json();
-        navigate(`/chat/${newChat.id}`);
         setDrawerOpen(false);
       };
 
@@ -39,7 +34,10 @@ return (
                 </DrawerHeader>
                 <button><PlusIcon
                 className="size-8 text-[#E34234] stroke-[3] cursor-pointer hover:opacity-70"
-                onClick={() => startNewConversation()}></PlusIcon>
+                onClick={async () => {
+                    await createNewConversation();
+                    setDrawerOpen(false);
+                }}></PlusIcon>
                 </button>
                 {conversations.map((conversation) => (
                     <div key={conversation.id}
@@ -50,7 +48,6 @@ return (
                     </div>
                 ))}
             </DrawerContent>
-
         </Drawer>
     </div>
       );

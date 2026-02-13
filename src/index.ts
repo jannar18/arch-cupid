@@ -13,27 +13,6 @@ const server = serve({
     // Serve index.html for all unmatched routes.
     "/*": index,
 
-    "/api/hello": {
-      async GET(req) {
-        const message = await anthropic.messages.create({
-          model: "claude-haiku-4-5-20251001",
-          max_tokens: 1000,
-          messages: [
-            {role: "user", content: "Say hello in a fun way!"}
-          ],
-          }); 
-
-        return Response.json(message);
-      },
-    },
-
-    "/api/hello/:name": async req => {
-      const name = req.params.name;
-      return Response.json({
-        message: `Hello, ${name}!`,
-      });
-    },
-
     "/api/conversations": {
       async POST(req) {
         const conversation = await storage.createConversation();
@@ -72,7 +51,7 @@ const server = serve({
         const response = await anthropic.messages.create({
           model: "claude-haiku-4-5-20251001",
           max_tokens: 1000,
-          messages: conversation.messages, //instead of messageHistory
+          messages: conversation.messages,
         });
 
         const assistantMessage = response.content[0].type === "text"

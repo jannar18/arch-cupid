@@ -31,8 +31,8 @@ export class InMemoryStorage implements Storage {
             createdAt: Date.now(),
             updatedAt: Date.now(),
         };
-    this.conversations[conversation.id] = conversation; 
-    return conversation;
+        this.conversations[conversation.id] = conversation;
+        return conversation;
     }
 
     async getConversation(id:string): Promise<Conversation | null> {
