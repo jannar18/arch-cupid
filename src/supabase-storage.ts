@@ -8,7 +8,7 @@ const supabase = createClient(
 
 export class SupabaseStorage implements Storage {
 
-    async createConversation(): Promise<Conversation> {
+    async createConversation(userId: string): Promise<Conversation> {
         const conversation: Conversation = {
             messages: [],
             id: crypto.randomUUID(),
@@ -19,6 +19,7 @@ export class SupabaseStorage implements Storage {
 
         await supabase.from("conversations").insert({
             id: conversation.id,
+            user_id: userId,
             title: conversation.title,
             createdAt: conversation.createdAt,
             updatedAt: conversation.updatedAt,
@@ -27,11 +28,12 @@ export class SupabaseStorage implements Storage {
         return conversation;
     }
 
-    async getConversation(id: string): Promise<Conversation | null> {
+    async getConversation(id: string, userId: string): Promise<Conversation | null> {
         const { data: conversationRow } = await supabase
             .from("conversations")
             .select("*")
             .eq("id", id)
+            .eq("user_id", userId)
             .single();
 
         if (!conversationRow) return null;
@@ -51,10 +53,11 @@ export class SupabaseStorage implements Storage {
         };
     }
 
-    async getConversations(): Promise<Conversation[]> {
+    async getConversations(userId: string): Promise<Conversation[]> {
         const { data: rows } = await supabase
             .from("conversations")
             .select("*")
+            .eq("user_id", userId)
             .order("updatedAt", { ascending: false });
 
         if (!rows) return [];
@@ -118,6 +121,6 @@ export class SupabaseStorage implements Storage {
                 .eq("id", id);
         }
 
-        return this.getConversation(id);
+        return this.getConversation(id, conversationRow.user_id);
     }
 }

@@ -2,6 +2,7 @@ import { serve } from "bun";
 import index from "./index.html";
 import Anthropic from "@anthropic-ai/sdk";
 import { SupabaseStorage } from "./supabase-storage";
+import { auth } from "./lib/auth";
 
 require('dotenv').config()
 
@@ -13,19 +14,40 @@ const server = serve({
     // Serve index.html for all unmatched routes.
     "/*": index,
 
+    "/api/auth/*": {
+      async GET(req) { 
+        return auth.handler(req);
+      },
+      async POST(req) {
+        return auth.handler(req);
+      },
+    },
+
     "/api/conversations": {
       async POST(req) {
-        const conversation = await storage.createConversation();
+        const session = await auth.api.getSession({ headers: req.headers })
+        if (!session) {
+          return Response.json({ error: "Unauthorized" }, { status: 401})
+        }
+        const conversation = await storage.createConversation(session.user.id);
         return Response.json(conversation);
       },
       async GET(req) {
-        return Response.json(await storage.getConversations());
+        const session = await auth.api.getSession({ headers: req.headers })
+        if (!session) {
+          return Response.json({ error: "Unauthorized" }, { status: 401})
+        }
+        return Response.json(await storage.getConversations(session.user.id));
       },
     },
 
     "/api/conversations/:id": {
       async GET(req) {
-        const conversation = await storage.getConversation(req.params.id);
+        const session = await auth.api.getSession({ headers: req.headers })
+        if (!session) {
+          return Response.json({ error: "Unauthorized" }, { status: 401})
+        }
+        const conversation = await storage.getConversation(req.params.id, session.user.id);
         if (!conversation) {
           return Response.json({error: "Conversation not found"}, {
           status:404});
@@ -36,6 +58,10 @@ const server = serve({
 
     "/api/conversations/:id/chat": {
       async POST(req) {
+        const session = await auth.api.getSession({ headers: req.headers })
+        if (!session) {
+          return Response.json({ error: "Unauthorized" }, { status: 401})
+        }
         const id = req.params.id;
         const body = await req.json(); 
 
