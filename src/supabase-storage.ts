@@ -1,7 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import type { Storage, Message, Conversation } from "./storage";
 
-const supabase = createClient(
+export const supabase = createClient(
     process.env.SUPABASE_URL!,
     process.env.SUPABASE_ANON_KEY!
 );
@@ -40,7 +40,7 @@ export class SupabaseStorage implements Storage {
 
         const { data: messageRows } = await supabase
             .from("messages")
-            .select("role, content")
+            .select("role, content, match_data")
             .eq("chatId", id)
             .order("createdAt", { ascending: true });
 
@@ -66,7 +66,7 @@ export class SupabaseStorage implements Storage {
         for (const row of rows) {
             const { data: messageRows } = await supabase
                 .from("messages")
-                .select("role, content")
+                .select("role, content, match_data")
                 .eq("chatId", row.id)
                 .order("createdAt", { ascending: true });
 
@@ -99,6 +99,7 @@ export class SupabaseStorage implements Storage {
             chatId: id,
             role: message.role,
             content: message.content,
+            match_data: message.match_data ?? null,
             createdAt: now,
         });
 

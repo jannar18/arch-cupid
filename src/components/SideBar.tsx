@@ -30,7 +30,7 @@ return (
 
             <DrawerContent>
                 <DrawerHeader className="bg-[#E34234] p-0">
-                <h2 className="!text-white text-normal text-3x1">Conversations</h2>
+                <h2 className="!text-white text-normal text-3xl">Love Letters</h2>
                 </DrawerHeader>
                 <button><PlusIcon
                 className="size-8 text-[#E34234] stroke-[3] cursor-pointer hover:opacity-70"

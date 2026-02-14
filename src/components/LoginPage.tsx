@@ -14,8 +14,8 @@ export function LoginPage() {
 
     return (
         <div className="flex flex-col items-center justify-center h-screen">
-            <div className="flex flex-col gap-4 w-[600px] max-w-2xl">
-                    <h2 className="text-lg font-medium text-[#E34234]">"Login"</h2>
+            <div className="flex flex-col gap-4 w-full max-w-[600px] px-4">
+                    <h2 className="text-lg font-medium text-[#E34234]">Find Your Architecture Valentine</h2>
                 <input
                     className="w-full border border-gray-300 border-t-0 p-0 rounded-none focus:outline-none focus:bg-[#FDF3F2] placeholder:text-gray-400"
                     placeholder="Email"
@@ -42,13 +42,13 @@ export function LoginPage() {
                     className="text-[#E34234] font-medium cursor-pointer hover:opacity-70 text-left"
                     onClick={async () => {
                         if (isSignUp) {
-                            await signUp(email, password, name)
+                            await signUp(email, password, name);
                         } else {
-                            await signIn(email, password)
+                            await signIn(email, password);
                         }
-                        navigate("/new"),
-                        setEmail(""),
-                        setPassword(""),
+                        navigate("/new");
+                        setEmail("");
+                        setPassword("");
                         setName("");
                     }}
                 >
@@ -58,7 +58,9 @@ export function LoginPage() {
                 <button
                     className="text-gray-500 font-medium cursor-pointer hover:text-[#E34234] text-left"
                     onClick={async () => {
-                        await authClient.signIn.social({ provider: "github" })
+                        await authClient.signIn.social({
+                            provider: "github",
+                            callbackURL: "/new", })
                     }}
                 >
                     Sign in with GitHub

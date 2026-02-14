@@ -10,6 +10,7 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter, Routes, Route } from "react-router";
 import { App } from "./App";
 import { LoginPage } from "./components/LoginPage";
+import { WallOfLove } from "./components/WallOfLove";
 
 const elem = document.getElementById("root")!;
 const app = (
@@ -19,6 +20,7 @@ const app = (
         <Route path="/" element={<LoginPage />} />
         <Route path="/new" element={<App />} />
         <Route path="/chat/:chatId" element={<App />} />
+        <Route path="/wall" element={<WallOfLove />} />
       </Routes>
     </BrowserRouter>
   </StrictMode>

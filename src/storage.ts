@@ -1,8 +1,9 @@
 
 
-export type Message = { 
+export type Message = {
     role: "user" | "assistant";
     content: string;
+    match_data?: Record<string, string | null> | null;
 };
 
 export type Conversation = { 

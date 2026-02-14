@@ -1,9 +1,4 @@
 @import "tailwindcss";
-@keyframes blink {                                                            
-    0%, 100% { opacity: 1; }                                                    
-    50% { opacity: 0; }                                                         
-  }  
-
  textarea, input {
     caret-color: #E34234;
     caret-shape: block;
