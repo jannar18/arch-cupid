@@ -77,7 +77,7 @@ const handleSend = () => {
                 <Textarea
                     autoFocus
                     className="min-h-0 border-t-0 border-gray-200 px-0 py-0 resize-none overflow-hidden rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 border-gray-300 focus:bg-[#FDF3F2]"
-                    placeholder="Upload or describe a building you love..."
+                    placeholder={hasMessages ? "Tell me more..." : "Upload or describe a building you love..."}
                     value={input}
                     onChange={(event) => {
                         setInput(event.target.value);
