@@ -47,6 +47,7 @@ The "summary" should be 1-2 sentences describing their architectural love langua
 Only generate ONE love profile per conversation. Do NOT mention the profile block to the user — it's extracted automatically.`;
 
 const server = serve({
+  port: process.env.PORT || 3000,
   routes: {
     // Serve index.html for all unmatched routes.
     "/*": index,
