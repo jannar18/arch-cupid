@@ -105,7 +105,22 @@ export function MessageList({ messages }: { messages: ChatMessage[] }) {
               </CardContent>
             </Card>
           ) : message.matchData ? (
-            <div key={index} ref={isLast ? lastMsgRef : undefined}>
+            <div key={index} ref={isLast ? lastMsgRef : undefined} className="flex flex-col gap-4">
+              {/* Style analysis text */}
+              {message.content && (
+                <div className="ml-auto max-w-[85%] rounded-xl overflow-hidden shadow border-2 border-pink-200"
+                  style={{ background: "linear-gradient(135deg, #E34234 0%, #E85D50 30%, #F2A0A0 60%, #FBD5D5 100%)" }}>
+                  <div className="flex items-center justify-center gap-1 py-1.5">
+                    <HeartIcon className="size-2.5 text-white fill-white" />
+                    <HeartIcon className="size-3 text-white fill-white" />
+                    <HeartIcon className="size-2.5 text-white fill-white" />
+                  </div>
+                  <div className="bg-white mx-2 mb-2 rounded-lg px-4 py-3">
+                    <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{message.content}</p>
+                  </div>
+                </div>
+              )}
+              {/* Valentine card */}
               <ValentineCard match={message.matchData} />
             </div>
           ) : (
