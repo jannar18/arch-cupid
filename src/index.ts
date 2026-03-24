@@ -60,10 +60,20 @@ const server = serve({
 
     "/api/auth/*": {
       async GET(req) {
-        return auth.handler(req);
+        try {
+          return await auth.handler(req);
+        } catch (e) {
+          console.error("[Auth GET]", e);
+          return Response.json({ error: String(e) }, { status: 500 });
+        }
       },
       async POST(req) {
-        return auth.handler(req);
+        try {
+          return await auth.handler(req);
+        } catch (e) {
+          console.error("[Auth POST]", e);
+          return Response.json({ error: String(e) }, { status: 500 });
+        }
       },
     },
 
